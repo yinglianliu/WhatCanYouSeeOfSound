@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="What Can You See of Sound — An interactive sound visualization experience driven by weather and music.">
+  <title>What Can You See of Sound</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <!-- p5.js -->
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.11.1/lib/p5.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.11.1/lib/addons/p5.sound.min.js"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Loading overlay -->
+  <div id="loading-overlay">
+    <div class="loader-content">
+      <div class="loader-ring"></div>
+      <p class="loader-text">Loading experience...</p>
+      <p class="loader-subtext" id="loading-status">Initializing</p>
+    </div>
+  </div>
+
+  <!-- All rendering handled by p5.js canvas -->
+  <script src="js/weather.js"></script>
+  <script src="js/circle.js"></script>
+  <script src="js/ui/clock.js"></script>
+  <script src="js/ui/ledStrip.js"></script>
+  <script src="js/patterns/dreampop.js"></script>
+  <script src="js/patterns/lively.js"></script>
+  <script src="js/patterns/rhythmic.js"></script>
+  <script src="js/sketch.js"></script>
+</body>
+</html>
