@@ -7,9 +7,12 @@
  * @param {object|null} weatherData - weather info from API
  * @param {boolean} weatherLoading - whether weather is still loading
  * @param {object} bounce - { x, y, vx, vy } bouncing rectangle state
+ * @param {object} themeColors - colors object
+ * @param {number} themeTransition - 0 (light) to 1 (dark)
  */
-function drawClockPage(weatherData, weatherLoading, bounce) {
-  background(0);
+function drawClockPage(weatherData, weatherLoading, bounce, themeColors, themeTransition) {
+  // Use dynamically synced background color
+  background(themeColors ? themeColors.bg : 0);
 
   const cx = width / 2;
 
@@ -51,27 +54,33 @@ function drawClockPage(weatherData, weatherLoading, bounce) {
   if (abs(bounce.vx) < 3) bounce.vx = (bounce.vx >= 0 ? 1 : -1) * random(3, 6);
   if (abs(bounce.vy) < 3) bounce.vy = (bounce.vy >= 0 ? 1 : -1) * random(3, 6);
 
+  const fgGray = lerp(40, 250, themeTransition);
+  const fgAlpha = lerp(60, 175, themeTransition);
+
   // Outer border rectangle
   rectMode(CORNER);
   strokeWeight(2);
-  stroke(250, 175);
-  fill(255, 20);
+  stroke(fgGray, fgAlpha);
+  fill(fgGray, 20);
   rect(marginX - 20, marginY - 20, boxW + 40, boxH + 40, 28);
 
   // Background rectangle
   noStroke();
-  fill(255, 20);
+  fill(themeColors ? (themeTransition > 0.5 ? 20 : 230) : 255, 20);
   rect(marginX, marginY, boxW, boxH);
 
   // Second counter bar
   const sc = second();
   const scMap = map(sc, 0, 60, 0, boxW);
-  fill(20, map(sc, 0, 60, 50, 150), map(sc, 0, 60, 100, 20));
-  rect(marginX, marginY, scMap, boxH);
+  // Color the progressive bar subtly
+  const barGreen = lerp(200, 50, themeTransition);
+  const barBlue = lerp(220, 100, themeTransition);
+  fill(20, barGreen, barBlue, 80);
+  rect(marginX, marginY, scMap, boxH, 20);
 
-  // Bouncing white rectangle
-  fill(255);
-  rect(bounce.x, bounce.y, 50, 20);
+  // Bouncing naughty rectangle
+  fill(themeColors ? themeColors.tHero : 255);
+  rect(bounce.x, bounce.y, 50, 20, 5);
 
   // ---- Digital Clock ----
   const hr = hour();
@@ -79,7 +88,7 @@ function drawClockPage(weatherData, weatherLoading, bounce) {
   const scVal = second();
   const timeStr = nf(hr, 2) + ' : ' + nf(mn, 2) + ' : ' + nf(scVal, 2);
 
-  fill(250);
+  fill(themeColors ? themeColors.tHero : 250);
   noStroke();
   textFont('Orbitron');
   textAlign(CENTER, CENTER);
@@ -91,18 +100,18 @@ function drawClockPage(weatherData, weatherLoading, bounce) {
   textAlign(CENTER, CENTER);
 
   if (weatherLoading) {
-    fill(255, 120);
+    fill(themeColors ? themeColors.tSec : 120);
     textSize(min(width / 40, 18));
     text('Fetching weather...', cx, marginY - 80);
   } else if (weatherData) {
     // Weather emoji + description
     textSize(min(width / 25, 32));
-    fill(255, 220);
+    fill(themeColors ? themeColors.tHero : 220);
     text(weatherData.emoji + '  ' + weatherData.description, cx, marginY - 110);
 
     // Temperature + City
     textSize(min(width / 35, 22));
-    fill(255, 160);
+    fill(themeColors ? themeColors.tSec : 160);
     text(
       weatherData.temperature + weatherData.temperatureUnit + '  ·  ' + weatherData.city,
       cx, marginY - 70
@@ -110,7 +119,7 @@ function drawClockPage(weatherData, weatherLoading, bounce) {
 
     // Mood hint
     textSize(min(width / 50, 15));
-    fill(255, 80);
+    fill(themeColors ? themeColors.weather : 80);
     const moodLabel = {
       dreampop: '🌊 Dream Pop mood detected',
       lively: '🎸 Lively mood detected',
@@ -132,21 +141,20 @@ function drawClockPage(weatherData, weatherLoading, bounce) {
   // Button glow
   if (isHover) {
     drawingContext.shadowBlur = 25;
-    drawingContext.shadowColor = 'rgba(255, 255, 255, 0.4)';
+    drawingContext.shadowColor = themeTransition < 0.5 ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.2)';
+  } else {
+    drawingContext.shadowBlur = 0;
   }
 
-  rectMode(CORNER);
-  noStroke();
-  fill(isHover ? 255 : 240);
-  rect(btnX, btnY, btnW, btnH, btnH / 2);
-
+  // Button background
+  fill(isHover ? (themeColors ? themeColors.btnHover : 60) : (themeColors ? themeColors.btnIdle : 20));
+  rect(btnX, btnY, btnW, btnH, 28);
   drawingContext.shadowBlur = 0;
 
-  fill(0);
-  textFont('Inter');
-  textSize(min(width / 50, 16));
+  // Button text
+  fill(isHover ? (themeColors ? themeColors.btnTextActive : 255) : (themeColors ? themeColors.btnTextIdle : 200));
+  textSize(20);
   textStyle(BOLD);
-  textAlign(CENTER, CENTER);
   text('START EXPERIENCE', cx, btnY + btnH / 2);
   textStyle(NORMAL);
 

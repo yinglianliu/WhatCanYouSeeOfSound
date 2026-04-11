@@ -10,14 +10,19 @@ let mood = 'dreampop';    // 'dreampop' | 'lively' | 'rhythmic'
 let weatherData = null;
 let weatherLoading = true;
 
+// ======================== THEMES ========================
+let themeMode = 'light';
+let themeTransition = 0; // 0 = light, 1 = dark
+let LIGHT_THEME, DARK_THEME, themeColors;
+
 // ======================== LAYOUT ========================
 
 let vizX, vizY, vizSize;  // square visualization area
 const MIN_PANEL_WIDTH = 140;
 
 function _calculateLayout() {
-  // Square canvas: as large as possible, leaving room for side panels
-  vizSize = min(height - 40, width - MIN_PANEL_WIDTH * 2);
+  // Square canvas: slightly shrunken to create an "island painting" look (Plan B)
+  vizSize = min(height - 40, width - MIN_PANEL_WIDTH * 2) * 0.85;
   vizSize = max(vizSize, 200);
   vizX = (width - vizSize) / 2;
   vizY = (height - vizSize) / 2;
@@ -77,6 +82,7 @@ const IDLE_TIMEOUT = 5000;
 let circles = [];
 let bounce = { x: 100, y: 200, vx: 3.5, vy: 4.5 };
 let clockBtn = null;
+let themeBtn = null;
 let moodBtns = [];
 let backBtn = null;
 let nextBtn = null;
@@ -92,6 +98,40 @@ function setup() {
   lastMouseMove = millis();
   _calculateLayout();
 
+  // Initialize Themes
+  LIGHT_THEME = {
+    bg: color(225),
+    tHero: color(15),
+    tSec: color(60),
+    tTert: color(120),
+    weather: color(90),
+    btnIdle: color(210),
+    btnHover: color(80),
+    btnActive: color(15),
+    btnTextIdle: color(30),
+    btnTextActive: color(255)
+  };
+
+  DARK_THEME = {
+    bg: color(12, 12, 15),
+    tHero: color(255),
+    tSec: color(180),
+    tTert: color(120),
+    weather: color(180),
+    btnIdle: color(25, 25, 30),
+    btnHover: color(80),
+    btnActive: color(220),
+    btnTextIdle: color(150),
+    btnTextActive: color(15)
+  };
+
+  const hr = hour();
+  themeMode = (hr >= 6 && hr < 18) ? 'light' : 'dark';
+  themeTransition = (themeMode === 'light') ? 0 : 1;
+  
+  // Create shallow copy just to hold the structure
+  themeColors = Object.assign({}, LIGHT_THEME); 
+
   const overlay = document.getElementById('loading-overlay');
   if (overlay) overlay.classList.add('hidden');
 
@@ -106,6 +146,21 @@ function setup() {
 }
 
 function draw() {
+  // ---- Theme Lerp Engine ----
+  let targetTransition = (themeMode === 'dark') ? 1 : 0;
+  themeTransition = lerp(themeTransition, targetTransition, 0.08);
+
+  themeColors.bg = lerpColor(LIGHT_THEME.bg, DARK_THEME.bg, themeTransition);
+  themeColors.tHero = lerpColor(LIGHT_THEME.tHero, DARK_THEME.tHero, themeTransition);
+  themeColors.tSec = lerpColor(LIGHT_THEME.tSec, DARK_THEME.tSec, themeTransition);
+  themeColors.tTert = lerpColor(LIGHT_THEME.tTert, DARK_THEME.tTert, themeTransition);
+  themeColors.weather = lerpColor(LIGHT_THEME.weather, DARK_THEME.weather, themeTransition);
+  themeColors.btnIdle = lerpColor(LIGHT_THEME.btnIdle, DARK_THEME.btnIdle, themeTransition);
+  themeColors.btnHover = lerpColor(LIGHT_THEME.btnHover, DARK_THEME.btnHover, themeTransition);
+  themeColors.btnActive = lerpColor(LIGHT_THEME.btnActive, DARK_THEME.btnActive, themeTransition);
+  themeColors.btnTextIdle = lerpColor(LIGHT_THEME.btnTextIdle, DARK_THEME.btnTextIdle, themeTransition);
+  themeColors.btnTextActive = lerpColor(LIGHT_THEME.btnTextActive, DARK_THEME.btnTextActive, themeTransition);
+
   // ---- Mouse in viz area check ----
   const mouseInViz = mouseX >= vizX && mouseX <= vizX + vizSize
                   && mouseY >= vizY && mouseY <= vizY + vizSize;
@@ -129,7 +184,7 @@ function draw() {
 
   // ---- Render current page ----
   if (page === 'clock') {
-    clockBtn = drawClockPage(weatherData, weatherLoading, bounce);
+    clockBtn = drawClockPage(weatherData, weatherLoading, bounce, themeColors, themeTransition);
   } else if (page === 'loading_music') {
     _drawLoadingPage();
   } else if (page === 'visualizer') {
@@ -303,18 +358,13 @@ function _transitionToVisualizer() {
 
 function _drawVisualizerPage() {
   // 1. Draw opaque background for everything OUTSIDE the square canvas
-  //    This clears side panels + top/bottom margins each frame
-  //    while the square area retains its previous frame (trails persist)
   noStroke();
   rectMode(CORNER);
-  fill(12, 12, 15);
+  fill(themeColors.bg); 
   rect(0, 0, vizX, height);                                // left
   rect(vizX + vizSize, 0, width - vizX - vizSize, height); // right
   rect(vizX, 0, vizSize, vizY);                             // top
   rect(vizX, vizY + vizSize, vizSize, height - vizY - vizSize); // bottom
-
-  // 2. Draw frosted glass side panels
-  _drawSidePanels();
 
   // 3. Draw pattern (clipped to square canvas, translated so 0,0 = square origin)
   push();
@@ -335,33 +385,14 @@ function _drawVisualizerPage() {
   drawingContext.restore();
   pop();
 
-
-
   // 5. LED strips (positioned adjacent to square, drawn on main canvas)
-  drawLedStrips(amp, valueOfAmp, widthToPot, widthToPot2);
+  drawLedStrips(amp, valueOfAmp, widthToPot, widthToPot2, themeTransition);
 
   // 6. UI elements on side panels
   _drawVisualizerUI();
 }
 
-function _drawSidePanels() {
-  const panelL = vizX;
-  const panelR = width - vizX - vizSize;
-
-  noStroke();
-  rectMode(CORNER);
-
-  // Layer: Subtle color tint from current pattern background
-  const tintAlpha = 12 + amp * 25;
-  fill(widthToPot * 0.3, widthToPot2 * 0.3, (255 - 255 * amp) * 0.3, tintAlpha);
-  rect(0, 0, panelL, height);
-  rect(vizX + vizSize, 0, panelR, height);
-
-  // Layer: Subtle white frost
-  fill(255, 255, 255, 6 + amp * 4);
-  rect(0, 0, panelL, height);
-  rect(vizX + vizSize, 0, panelR, height);
-}
+// Removed obsolete frosted glass layer _drawSidePanels() function
 
 function _drawVisualizerUI() {
   const ledAreaW = 30; // Space reserved for LEDs
@@ -391,10 +422,10 @@ function _drawVisualizerUI() {
   noStroke();
   textFont('Inter');
 
-  // 1. Weather (Aligned vertically with the top of the right mood buttons)
+  // 1. Weather
   if (weatherData) {
     textAlign(CENTER, TOP);
-    fill(255, 120);
+    fill(themeColors.weather);
     textSize(max(10 * sL, 8));
     text(
       weatherData.emoji + ' ' + weatherData.temperature + weatherData.temperatureUnit + '  ' + weatherData.description,
@@ -402,28 +433,30 @@ function _drawVisualizerUI() {
     );
   }
 
-  // 2. Mood & Song (Center-aligned starting at vertical midpoint)
-  // Mood text takes ~2/3 of left info width (approximated by text size)
-  fill(255, 200);
+  // 2. Mood (Brutalist Hero Typography)
+  fill(themeColors.tHero);
   textAlign(CENTER, BOTTOM);
-  textSize(max(panelL * 0.15, 16)); // Sized proportionally to width
+  textSize(max(panelL * 0.14, 16)); // Shrunk slightly to ensure word fits
   textStyle(BOLD);
-  text(MOOD_LABELS[mood] || mood, panelCenterL, centerY - 8);
+  // Strip the emoji to keep it pure brutalist typography
+  let cleanMood = (MOOD_LABELS[mood] || mood).substring(2).trim();
+  text(cleanMood, panelCenterL, centerY - 8);
   textStyle(NORMAL);
 
-  const songName = SONG_NAMES[mood] ? SONG_NAMES[mood][songIndex] : '';
-  fill(255, 110);
-  textSize(max(panelL * 0.065, 9)); // Slightly smaller than before
+  // 3. Song Name
+  const songName = SONGS_LIST = SONG_NAMES[mood] ? SONG_NAMES[mood][songIndex] : '';
+  fill(themeColors.tSec);
+  textSize(max(panelL * 0.065, 10)); // Shrunk slightly
   textAlign(CENTER, TOP);
-  // Using bounding box with padding to enforce word-wrapping and keep it away from edges
-  text(songName, pad, centerY + 12, panelL - pad * 2, 80);
+  // Increase bounding box height to 200 to prevent multi-line clipping
+  text(songName, pad, centerY + 12, panelL - pad * 2, 200);
 
-  // 3. Clock (Bottom)
+  // 4. Clock
   const hr = hour();
   const mn = minute();
   const sc = second();
   const timeStr = nf(hr, 2) + ':' + nf(mn, 2) + ':' + nf(sc, 2);
-  fill(255, 80);
+  fill(themeColors.tTert);
   textFont('Orbitron');
   textSize(max(10 * sL, 8));
   textAlign(CENTER, BOTTOM);
@@ -431,6 +464,21 @@ function _drawVisualizerUI() {
   textFont('Inter');
 
   // ===================== RIGHT PANEL — BUTTONS =====================
+
+  // Theme Toggle Button (Top Right)
+  const tbSize = 24;
+  const tbX = width - tbSize - pad;
+  const tbY = pad;
+  const tbHover = mouseX > tbX && mouseX < tbX + tbSize 
+               && mouseY > tbY && mouseY < tbY + tbSize;
+  noStroke();
+  fill(tbHover ? themeColors.btnHover : themeColors.btnIdle);
+  rect(tbX, tbY, tbSize, tbSize, 4);
+  fill(tbHover ? themeColors.btnTextActive : themeColors.btnTextIdle);
+  textAlign(CENTER, CENTER);
+  textSize(14);
+  text(themeMode === 'light' ? '🌙' : '☀️', tbX + tbSize / 2, tbY + tbSize / 2);
+  themeBtn = { x: tbX, y: tbY, w: tbSize, h: tbSize };
 
   // Mood switch buttons
   moodBtns = [];
@@ -445,17 +493,18 @@ function _drawVisualizerUI() {
     const isHover = mouseX > bx && mouseX < bx + moodBtnW
                  && mouseY > by && mouseY < by + moodBtnH;
 
-    noStroke();
     if (isActive) {
-      fill(255, 200);
+      fill(themeColors.btnActive);
     } else if (isHover) {
-      fill(255, 55);
+      fill(themeColors.btnHover);
     } else {
-      fill(255, 18);
+      fill(themeColors.btnIdle); 
     }
+    
+    noStroke();
     rect(bx, by, moodBtnW, moodBtnH, 8);
 
-    fill(isActive ? 10 : 255);
+    fill(isActive || isHover ? themeColors.btnTextActive : themeColors.btnTextIdle);
     textAlign(CENTER, CENTER);
     textSize(max(10 * sR, 8));
     textStyle(isActive ? BOLD : NORMAL);
@@ -474,10 +523,15 @@ function _drawVisualizerUI() {
   const backX = navStartX;
   const backHover = mouseX > backX && mouseX < backX + navBtnW
                  && mouseY > navY && mouseY < navY + navBtnH;
+                 
+  if (backHover) {
+    fill(themeColors.btnHover);
+  } else {
+    fill(themeColors.btnIdle); 
+  }
   noStroke();
-  fill(255, backHover ? 60 : 20);
   rect(backX, navY, navBtnW, navBtnH, 8);
-  fill(255, backHover ? 250 : 150);
+  fill(backHover ? themeColors.btnTextActive : themeColors.btnTextIdle);
   textSize(max(14 * sR, 10));
   textAlign(CENTER, CENTER);
   text('←', backX + navBtnW / 2, navY + navBtnH / 2);
@@ -487,9 +541,15 @@ function _drawVisualizerUI() {
   const nextX = backX + navBtnW + navGap;
   const nextHover = mouseX > nextX && mouseX < nextX + navBtnW
                  && mouseY > navY && mouseY < navY + navBtnH;
-  fill(255, nextHover ? 60 : 20);
+                 
+  if (nextHover) {
+    fill(themeColors.btnHover);
+  } else {
+    fill(themeColors.btnIdle);
+  }
+  noStroke();
   rect(nextX, navY, navBtnW, navBtnH, 8);
-  fill(255, nextHover ? 250 : 150);
+  fill(nextHover ? themeColors.btnTextActive : themeColors.btnTextIdle);
   textSize(max(12 * sR, 10));
   text('⏭', nextX + navBtnW / 2, navY + navBtnH / 2);
   nextBtn = { x: nextX, y: navY, w: navBtnW, h: navBtnH };
@@ -498,6 +558,11 @@ function _drawVisualizerUI() {
 // ======================== VISUALIZER INTERACTION ========================
 
 function _handleVisualizerClick() {
+  if (themeBtn && mouseX > themeBtn.x && mouseX < themeBtn.x + themeBtn.w
+      && mouseY > themeBtn.y && mouseY < themeBtn.y + themeBtn.h) {
+    themeMode = themeMode === 'light' ? 'dark' : 'light';
+    return;
+  }
   // Mood buttons (right panel)
   for (const btn of moodBtns) {
     if (mouseX > btn.x && mouseX < btn.x + btn.w &&
