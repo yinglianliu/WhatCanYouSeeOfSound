@@ -1,40 +1,40 @@
-# 🌌 What Can You See Of Sound - 创造愿景与规划 (Project Vision)
+# 🌌 What Can You See Of Sound - Project Vision
 
-> **给 AI 的提示 (Prompt for AI)**：
-> 当你作为一个新的对话实例进入本项目时，请**务必先完整阅读此文件**。这代表了创作者的终极意图和开发约束，所有的代码修改都必须严格遵从这里的底线和设计哲学。
+> **Prompt for AI**:
+> When entering this project as a new conversation instance, please **make sure to read this file completely first**. This represents the ultimate intention and development constraints of the creator, and all code modifications must strictly comply with the bottom lines and design philosophy herein.
 
 ---
 
-## 一、 终极愿景 (Ultimate Vision)
-*(在这里写下你对这个项目最终极的期待，比如：希望它成为一个让人凝神静气的视听冥想工具，或者是一个供画廊展览的实验性互动网页。)*
-- [ ] 愿景描述：...
+## I. Ultimate Vision
+*(Write down your ultimate expectations for this project here, for example: hoping it becomes an audiovisual meditation tool that calms the mind, or an experimental interactive web page for gallery exhibitions.)*
+- [ ] Vision Description: ...
 
-## 二、 核心设计哲学 (Core Design Philosophy)
-本项目有着极高的美学门槛，过去的迭代已经形成了固立的约束。**AI 在修改 UI 或视觉时请绝对遵守以下铁律**：
+## II. Core Design Philosophy
+This project has an extremely high aesthetic threshold, and past iterations have formed solid constraints. **AI must absolutely abide by the following ironclad rules when modifying UI or visuals**:
 
-1. **Awwwards 白昼/极简文字风 (Brutalist Typography)**：全面放弃模糊的胶片感或半透明滤镜，追求干净、利落的背景涂漆色（实体的高级灰/暗夜色）。所有文本排版需大胆占据空间（如将标题放大为视觉焦点），且**禁止在文本头部加 Emoji** 以保持排版纯洁性。
-2. **绝对防溢出排版禁令 (Text Bounding Box Strictness)**：这是最重要的技术死线！所有基于 `text()` 渲染的长文本（如较长的歌名、大号 Mood 字符）必须采用 `(string, x, y, width, height)` 格式构建限制边界容器 (Bounding Box)，甚至通过缩小 `textSize` 和增高容器 `height` 的方式来保证文字安全换行。不管后续增加任何新控件，**文本内容绝对不允许以任何形式冲入、覆盖或超出其所在的 Side Panel 面板领地**。
-3. **美术馆式孤岛画幅 (Canvas Island)**：中间的生成艺术或交互画布，应该作为独立无相框的岛屿悬浮于正中（四周需向外保留10%~15%的“灰色墙体”呼吸留白），绝不可让按钮或乱字踩进这片神圣的领地。
-3. **锋利切割感 (Sharp Brutalist Cuts)**：UI元素中尽量收敛圆角！无论是按钮悬停态，还是模拟发光的 LED 槽，一律使用极其硬朗的直角或极小的圆角（`borderRadius: 0 ~ 1`），彻底杜绝圆柱/药丸形的图形出现。
-4. **变色龙同步与物理灯叠层法则**：周边伴随发光的物理阵列光效（例如右侧的霓虹 LED），必须底层铺以真实物理底座光色（如白天的灯丝暖黄、黑夜的幽静深紫），核心色彩则实时吸取中央主画布色相随音乐振幅做瞬时爆闪同步。
+1. **Brutalist Typography**: Completely abandon blurry film vibes or translucent filters in pursuit of clean, sharp background paint colors (solid premium gray/dark night). All text typography must boldly occupy space (such as enlarging titles to be visual focal points), and **Emojis are forbidden at the beginning of text** to maintain typographic purity.
+2. **Text Bounding Box Strictness**: This is the most important technical deadline! All long text rendered based on `text()` (like long song titles, large Mood characters) must use the `(string, x, y, width, height)` format to build a restrictive Bounding Box, even by reducing `textSize` and increasing container `height` to ensure safe line wrapping. No matter what new controls are added later, **text content is absolutely not allowed to rush into, overlap, or exceed its Side Panel territory in any form**.
+3. **Canvas Island**: The generative art or interactive canvas in the middle should float in the center as an independent frameless island (reserving 10%~15% of the "gray wall" breathing space outwards all around), and buttons or chaotic text must never step into this sacred territory.
+4. **Sharp Brutalist Cuts**: Minimize rounded corners in UI elements! Whether it is the hover state of buttons or simulated glowing LED slots, extremely hard right angles or minimal rounded corners (`borderRadius: 0 ~ 1`) must be used uniformly, completely eliminating cylindrical/pill-shaped graphics.
+5. **Chameleon Sync and Physical Light Layering Rule**: Surrounding accompanying physical array light effects (such as neon LEDs on the right) must have a real physical base light color layered at the bottom (like warm yellow filament during the day, quiet deep purple at night), and the core color must instantly absorb the hue of the central main canvas in real-time to do instantaneous burst flashing synchronization with music amplitude.
 
-## 三、 功能路线图 (Future Roadmap / To-Do List)
-*(你想在未来做加入的新功能、技术上的新想法都列在这个池子里)*
+## III. Future Roadmap / To-Do List
+*(List new features you want to add in the future and new technical ideas in this pool)*
 
-- [ ] **视觉增强 (Visual Enhancement)**：如加入 WebGL 粒子、更复杂的 FFT (快速傅里叶变换) 音频分析。
-- [ ] **多端适配 (Mobile/Touch Support)**：让这套 UI 能完美运行在手机甚至是 iPad 的触摸屏上。
-- [ ] **外部数据接入 (API Integrations)**：除了目前基于地域天气（Open-Meteo），未来是否考虑接入 Spotify 实时播放流或麦克风收音？
-- [ ] *[添加你的新灵感 1...]*
-- [ ] *[添加你的新灵感 2...]*
+- [ ] **Visual Enhancement**: Such as adding WebGL particles, more complex FFT (Fast Fourier Transform) audio analysis.
+- [ ] **Mobile/Touch Support**: Make this UI run perfectly on the touch screen of mobile phones or even iPads.
+- [ ] **API Integrations**: Besides the current regional weather (Open-Meteo), consider integrating Spotify real-time streaming or microphone input in the future?
+- [ ] *[Add your new inspiration 1...]*
+- [ ] *[Add your new inspiration 2...]*
 
-## 四、 核心逻辑速查 (Logic Quick Reference)
-1. **音乐系统**：目前采用 p5.sound，通过 `amp` (Amplitude) 振幅变化驱动动画与光效爆闪。
-2. **天气与情感互联**：基于当前天气的特征码映射到三种情感模式：`Lively`, `Dream Pop`, `Rhythmic`。
-3. **全自动静默无缝昼夜引擎 (Day / Night Core)**：应用系统依靠时钟的 06:00 与 18:00 控制基调大盘，强制全局采用防残影的 `lerpColor` 色彩转场（保证界面背景颜色的更换像电影般渐变平滑，无需重载背景画面）。
-4. **时钟待机页**：包含一个带边缘调皮反弹随机特性的防沉睡方块，且其外表色系也由昼夜引擎实时接管。
+## IV. Logic Quick Reference
+1. **Music System**: Currently uses p5.sound, driving animations and light burst flashing through `amp` (Amplitude) changes.
+2. **Weather & Emotion Interconnection**: Maps current weather signatures to three emotion modes: `Lively`, `Dream Pop`, `Rhythmic`.
+3. **Fully Automatic Silent Seamless Day/Night Core**: The application system relies on the clock's 06:00 and 18:00 to control the basic tone, forcing global use of anti-ghosting `lerpColor` color transitions (ensuring interface background color changes are smooth like a movie gradient, without reloading the background canvas).
+4. **Clock Standby Page**: Contains an anti-sleep square with edge bouncing random characteristics, and its appearance color scheme is also taken over by the day/night engine in real-time.
 
-## 五、 杂记与灵感捕捉 (Brainstorm & Notes)
-*(随手记下的网址、参考的艺术家的名字、某个看上的特效链接等...)*
+## V. Brainstorm & Notes
+*(Jot down URLs, names of referenced artists, links to effects you fancy, etc...)*
 
 - 
 - 
